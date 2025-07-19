@@ -7,38 +7,104 @@
   <style>
     body {
       font-family: sans-serif;
-      padding: 20px;
+      margin: 0; /* bodyのデフォルトマージンをなくす */
+      padding: 0; /* bodyのパディングをなくす */
+      background-color: #fff; /* Light mode default */
+      color: #333; /* Light mode default */
+    }
+    body.dark-mode {
+      background-color: #333;
+      color: #eee;
+    }
+    h1 {
+      font-size: 2em; /* タイトルサイズを調整 */
+      text-align: center; /* タイトルを中央寄せ */
+      margin-top: 20px; /* 上部に余白 */
+      margin-bottom: 10px; /* 下部に余白 */
     }
     textarea {
-      width: 80%;
-      height: 150px;
-      padding: 10px;
+      width: 100%; /* 画面幅いっぱいに広げる */
+      min-height: 3em; /* 初期高さを3行分にする */
+      padding: 10px; /* テキストエリア内のパディングは維持 */
       font-size: 16px;
-      resize: vertical;
+      resize: vertical; /* ユーザーによる縦方向のリサイズを許可 */
+      box-sizing: border-box; /* paddingを含めて幅を計算 */
+      overflow-y: hidden; /* スクロールバーを非表示にし、内容に合わせて伸縮 */
+      border: 1px solid #ccc; /* 枠線を追加して見やすくする */
+      border-radius: 5px; /* 角を少し丸める */
+      background-color: #fff; /* Light mode default */
+      color: #333; /* Light mode default */
+    }
+    body.dark-mode textarea { /* ダークモード時のテキストエリアのスタイル */
+      background-color: #555; /* ダークモード時の背景色 */
+      color: #eee; /* ダークモード時の文字色 */
+      border-color: #777; /* ダークモード時の枠線色 */
+    }
+    .button-container {
+      display: flex; /* ボタンを横並びにする */
+      gap: 10px; /* ボタン間のスペース */
+      margin-top: 10px;
+      padding: 0 20px; /* ボタン群は左右に20pxのパディングを持たせる */
     }
     button {
       padding: 10px 15px;
       font-size: 16px;
-      margin-top: 10px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h2>コピー可能なテキストエリア</h2>
-  <textarea id="copyArea">ここに複数行のテキストを入力できます。</textarea><br />
-  <button onclick="copyText()">コピー</button>
+  <h1>📝</h1>
+  <textarea id="copyArea" oninput="adjustHeight(this)">ここに複数行のテキストを入力できます。</textarea>
+  <div class="button-container">
+    <button onclick="toggleDarkMode()">ダークモード</button>
+    <button onclick="clearText()">全削除</button>
+    <button onclick="copyText()">コピー</button>
+    <button onclick="moveLeft()">←</button>
+    <button onclick="moveRight()">→</button>
+  </div>
 
   <script>
+    // テキストエリアの初期高さを調整
+    document.addEventListener('DOMContentLoaded', function() {
+      const textarea = document.getElementById('copyArea');
+      adjustHeight(textarea);
+    });
+
+    function adjustHeight(textarea) {
+      textarea.style.height = 'auto'; // 一旦autoにして高さをリセット
+      textarea.style.height = (textarea.scrollHeight) + 'px'; // スクロール高さを設定
+    }
+
     function copyText() {
       const textarea = document.getElementById("copyArea");
       navigator.clipboard.writeText(textarea.value)
         .then(() => {
-          alert("コピーしました！");
+          // ポップアップは表示しない
         })
         .catch(err => {
-          alert("コピーに失敗しました: " + err);
+          alert("コピーに失敗しました: " + err); // 失敗時はアラートを残す
         });
+    }
+
+    function clearText() {
+      const textarea = document.getElementById("copyArea");
+      textarea.value = ''; // テキストエリアの内容を空にする
+      adjustHeight(textarea); // クリア後も高さを調整
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode'); // dark-modeクラスをトグル
+    }
+
+    // ←ボタン（機能は未実装）
+    function moveLeft() {
+      console.log("←ボタンがクリックされました。");
+    }
+
+    // →ボタン（機能は未実装）
+    function moveRight() {
+      console.log("→ボタンがクリックされました。");
     }
   </script>
 </body>
