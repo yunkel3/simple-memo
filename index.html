@@ -128,33 +128,33 @@ const showMessage = (msg) => {
 
 const copyText = () => {
   if (!t.value) return;
-
-  const hidden = document.createElement("textarea");
-  hidden.value = t.value;
-  hidden.setAttribute("readonly", "");
-  hidden.style.position = "absolute";
-  hidden.style.left = "-9999px";
-  hidden.style.fontSize = "12pt"; // iOSズーム対策
-  document.body.appendChild(hidden);
+  // Avoid focusing input field to prevent iOS keyboard
+  const dummy = document.createElement("textarea");
+  dummy.value = t.value;
+  dummy.setAttribute("readonly", "");
+  dummy.style.position = "absolute";
+  dummy.style.left = "-9999px";
+  dummy.style.fontSize = "16px"; // iOS zoom対策
+  document.body.appendChild(dummy);
 
   const selection = document.getSelection();
-  const selected = selection.rangeCount > 0 ? selection.getRangeAt(0) : false;
+  const selectedRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
 
-  hidden.select();
-  hidden.setSelectionRange(0, hidden.value.length); // iOS対策
+  dummy.select();
+  dummy.setSelectionRange(0, dummy.value.length);
 
   try {
-    const ok = document.execCommand("copy");
-    showMessage(ok ? "コピーしました！" : "コピーに失敗しました");
+    const success = document.execCommand("copy");
+    showMessage(success ? "コピーしました！" : "コピーに失敗しました");
   } catch (err) {
     console.error(err);
     showMessage("コピーに失敗しました");
   }
 
-  document.body.removeChild(hidden);
-  if (selected) {
+  document.body.removeChild(dummy);
+  if (selectedRange) {
     selection.removeAllRanges();
-    selection.addRange(selected);
+    selection.addRange(selectedRange);
   }
 };
 
