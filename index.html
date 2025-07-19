@@ -1,80 +1,66 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>シンプルメモ帳</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-<style>
-  body {
-    margin:0; font-family:sans-serif; color:#333; background:#f4f4f4;
-    display:flex; flex-direction:column; min-height:100vh;
-    transition:background .3s,color .3s; touch-action: manipulation;
-    padding-bottom: calc(40px + env(safe-area-inset-bottom)); /* フッターの高さ + セーフエリアの余白 */
-  }
-  body.dark-mode { background:#333; color:#f4f4f4; }
-  h1 {
-    margin:0; padding:15px 0; text-align:center; background:#fff;
-    box-shadow:0 2px 5px rgba(0,0,0,.1); color:#4caf50; flex-shrink:0;
-  }
-  body.dark-mode h1 { background:#555; color:#76ff03; }
-
-  /* フッターとしてボタンを固定 */
-  footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    background:#f9f9f9;
-    box-shadow:0 -2px 5px rgba(0,0,0,.05); /* 上方向に影 */
-    flex-shrink:0;
-    padding: 10px 0; /* ボタンの上下パディング */
-    padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* セーフエリアの余白を追加 */
-    z-index: 1000; /* 他のコンテンツより手前に表示 */
-  }
-  body.dark-mode footer { background:#444; }
-
-  button {
-    flex:1; padding:0; /* フッターでパディングを持たせるのでボタン自体は0 */
-    font-size:16px; border:none; background:transparent;
-    position:relative; cursor:pointer; color:inherit; overflow:hidden;
-    touch-action: manipulation; user-select:none;
-  }
-  button:not(:last-child) { border-right:1px solid #ccc; }
-  .action-button:not(:last-child) { border-color:#007bff; }
-  .utility-button:not(:last-child) { border-color:#6c757d; }
-  .danger-button:not(:last-child) { border-color:#dc3545; }
-
-  /* 新しい inactive スタイル */
-  button.inactive {
-    opacity: 0.5; /* 半透明にする */
-    cursor: default; /* カーソルをデフォルトにする（任意） */
-  }
-
-  .anim-bg {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    transform: translateX(-100%); animation:slideRight .5s ease forwards; z-index:0;
-  }
-  @keyframes slideRight { to { transform: translateX(100%); } }
-  .action-button .anim-bg { background:#007bff; }
-  .utility-button .anim-bg { background:#6c757d; }
-  .danger-button .anim-bg { background:#dc3545; }
-
-  .material-symbols-outlined {
-    font-size:24px; vertical-align:middle;
-  }
-
-  textarea {
-    width:100%; padding:20px; font-size:18px; line-height:1.5;
-    border:none; resize:none; outline:none; flex-grow: 1; /* 残りのスペースを埋める */
-    box-sizing:border-box; background:#fff; color:#333;
-    overflow:hidden;
-    min-height: calc(100vh - 80px - 200px - env(safe-area-inset-bottom)); /* ヘッダーとフッターを考慮した最小高さ（暫定値） */
-    transition:background .3s,color .3s;
-  }
-  body.dark-mode textarea { background:#222; color:#f4f4f4; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>シンプルメモ帳</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    body {
+      margin:0; font-family:sans-serif; color:#333; background:#f4f4f4;
+      display:flex; flex-direction:column; min-height:100vh;
+      transition:background .3s,color .3s; touch-action: manipulation;
+      padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    }
+    body.dark-mode { background:#333; color:#f4f4f4; }
+    h1 {
+      margin:0; padding:15px 0; text-align:center; background:#fff;
+      box-shadow:0 2px 5px rgba(0,0,0,.1); color:#4caf50; flex-shrink:0;
+    }
+    body.dark-mode h1 { background:#555; color:#76ff03; }
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; background:#f9f9f9;
+      box-shadow:0 -2px 5px rgba(0,0,0,.05); flex-shrink:0;
+      padding: 10px 0;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 1000;
+    }
+    body.dark-mode footer { background:#444; }
+    button {
+      flex:1; padding:0; font-size:16px; border:none; background:transparent;
+      position:relative; cursor:pointer; color:inherit; overflow:hidden;
+      touch-action: manipulation; user-select:none;
+    }
+    button:not(:last-child) { border-right:1px solid #ccc; }
+    .action-button:not(:last-child) { border-color:#007bff; }
+    .utility-button:not(:last-child) { border-color:#6c757d; }
+    .danger-button:not(:last-child) { border-color:#dc3545; }
+    button.inactive { opacity: 0.5; cursor: default; }
+    .anim-bg {
+      position:absolute; top:0; left:0; width:100%; height:100%;
+      transform: translateX(-100%); animation:slideRight .5s ease forwards; z-index:0;
+    }
+    @keyframes slideRight { to { transform: translateX(100%); } }
+    .action-button .anim-bg { background:#007bff; }
+    .utility-button .anim-bg { background:#6c757d; }
+    .danger-button .anim-bg { background:#dc3545; }
+    .material-symbols-outlined { font-size:24px; vertical-align:middle; }
+    textarea {
+      width:100%; padding:20px; font-size:18px; line-height:1.5;
+      border:none; resize:none; outline:none; flex-grow:1;
+      box-sizing:border-box; background:#fff; color:#333;
+      overflow:hidden;
+      min-height: calc(100vh - 80px - 200px - env(safe-area-inset-bottom));
+      transition:background .3s,color .3s;
+    }
+    body.dark-mode textarea { background:#222; color:#f4f4f4; }
+    .copy-msg {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: #007bff; color: white; padding: 10px 20px;
+      border-radius: 5px; z-index: 10000; font-size: 14px;
+    }
+  </style>
 </head>
 <body>
 <h1>📝️</h1>
@@ -90,97 +76,140 @@
 </footer>
 
 <script>
-  const t=document.getElementById("memo");
-  let undoStk=[],redoStk=[],restoring=false,lastVal="";
+const t = document.getElementById("memo");
+let undoStk = [], redoStk = [], restoring = false, lastVal = "";
 
-  const resize=()=>{ t.style.height="auto"; t.style.height=t.scrollHeight+"px"; };
-  const persist=()=> {
-    localStorage.memo=t.value;
-    localStorage.undoStack=JSON.stringify(undoStk);
-    localStorage.redoStack=JSON.stringify(redoStk);
+const resize = () => {
+  t.style.height = "auto";
+  t.style.height = t.scrollHeight + "px";
+};
+const persist = () => {
+  localStorage.memo = t.value;
+  localStorage.undoStack = JSON.stringify(undoStk);
+  localStorage.redoStack = JSON.stringify(redoStk);
+};
+const update = () => {
+  const hasText = !!t.value;
+  document.querySelectorAll(".undo").forEach(b => b.classList.toggle("inactive", undoStk.length <= 1));
+  document.querySelectorAll(".redo").forEach(b => b.classList.toggle("inactive", !redoStk.length));
+  document.querySelectorAll(".copy, .clear").forEach(b => b.classList.toggle("inactive", !hasText));
+};
+const apply = v => {
+  restoring = true;
+  t.value = lastVal = v;
+  resize();
+  restoring = false;
+  update();
+  persist();
+};
+const save = () => {
+  if (restoring || t.value === lastVal) return;
+  undoStk.push(t.value);
+  if (undoStk.length > 1000) undoStk.shift();
+  redoStk = [];
+  lastVal = t.value;
+  update();
+  persist();
+};
+const animateBtn = btn => {
+  const anim = document.createElement("span");
+  anim.className = "anim-bg";
+  btn.appendChild(anim);
+  anim.addEventListener("animationend", () => anim.remove());
+};
+
+const showMessage = (msg) => {
+  const div = document.createElement("div");
+  div.className = "copy-msg";
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 1500);
+};
+
+const copyText = () => {
+  if (!t.value) return;
+  const success = () => {
+    showMessage("コピーしました！");
+    t.blur(); // ← キーボードを閉じるための追加
+  };
+  const fail = () => {
+    showMessage("コピーに失敗しました");
+    t.blur(); // ← 失敗しても閉じる
   };
 
-  // update 関数を修正: disabled の代わりに inactive クラスを操作
-  const update=()=> {
-    const hasText=!!t.value;
-    document.querySelectorAll(".undo").forEach(b=>b.classList.toggle("inactive", undoStk.length <= 1));
-    document.querySelectorAll(".redo").forEach(b=>b.classList.toggle("inactive", !redoStk.length));
-    document.querySelectorAll(".copy, .clear").forEach(b=>b.classList.toggle("inactive", !hasText));
-  };
-
-  const apply=v=>{
-    restoring=true; t.value=lastVal=v; resize(); restoring=false; update(); persist();
-  };
-  const save=()=>{
-    if(restoring||t.value===lastVal) return;
-    undoStk.push(t.value); if(undoStk.length>1000) undoStk.shift();
-    redoStk=[]; lastVal=t.value; update(); persist();
-  };
-  const animateBtn=btn=>{
-    const anim=document.createElement("span");
-    anim.className="anim-bg";
-    btn.appendChild(anim);
-    anim.addEventListener("animationend",()=>anim.remove());
-  };
-
-  window.onload=()=>{
-    t.value=localStorage.memo||"";
-    try{ undoStk=JSON.parse(localStorage.undoStack)||[t.value]; }catch{undoStk=[t.value];}
-    try{ redoStk=JSON.parse(localStorage.redoStack)||[]; }catch{}
-    if(undoStk.at(-1)!==t.value) undoStk.push(t.value);
-    lastVal=t.value; resize(); update();
-
-    const isDark=localStorage.theme==="dark";
-    document.body.classList.toggle("dark-mode",isDark);
-    document.querySelectorAll(".theme .material-symbols-outlined").forEach(i=> {
-      i.textContent=isDark?"dark_mode":"light_mode";
-    });
-  };
-
-  t.addEventListener("input",()=>{
-    resize();
-    if(/\s|\n/.test(t.value.slice(-1))) save();
-    update();
-  });
-
-  for(const btn of document.querySelectorAll("button")){
-    btn.addEventListener("pointerdown",e=>{ // イベントオブジェクトeを受け取る
-      e.preventDefault(); // デフォルトのスクロール動作を抑制
-      
-      // ボタンが inactive でない場合のみアニメーション（または常にアニメーションさせるならこのif文は不要）
-      // 今回は inactive でもアニメーションさせるので、この if は削除
-      animateBtn(btn); // 条件に関わらずアニメーションは実行
-
-      // 各ボタンの処理の前に条件チェックを追加
-      if(btn.classList.contains("undo")){
-        if(undoStk.length <= 1) return; // 条件を満たさない場合は何もしない
-        if(t.value!==undoStk.at(-1)) redoStk.push(t.value);
-        else redoStk.push(undoStk.pop());
-        apply(undoStk.at(-1));
-      } else if(btn.classList.contains("redo")){
-        if(!redoStk.length) return; // 条件を満たさない場合は何もしない
-        const v=redoStk.pop();
-        undoStk.push(v);
-        apply(v);
-      } else if(btn.classList.contains("copy")){
-        if(!t.value) return; // 条件を満たさない場合は何もしない
-        navigator.clipboard.writeText(t.value).catch(()=>{});
-      } else if(btn.classList.contains("clear")){
-        if(!t.value) return; // 条件を満たさない場合は何もしない
-        if(confirm("メモをすべて削除しますか？")){
-          save(); t.value=""; redoStk=[]; apply("");
-        }
-      } else if(btn.classList.contains("theme")){
-        const dark=document.body.classList.toggle("dark-mode");
-        localStorage.theme=dark?"dark":"light";
-        document.querySelectorAll(".theme .material-symbols-outlined").forEach(i=>{
-          i.textContent=dark?"dark_mode":"light_mode";
-        });
-        resize();
-      }
-    });
-    btn.ondblclick=e=>e.preventDefault();
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(t.value).then(success).catch(() => fallbackCopy());
+  } else {
+    fallbackCopy();
   }
+
+  function fallbackCopy() {
+    try {
+      t.focus();
+      t.select();
+      t.setSelectionRange(0, t.value.length); // iOS対応
+      const ok = document.execCommand("copy");
+      ok ? success() : fail();
+    } catch (err) {
+      console.error(err);
+      fail();
+    }
+  }
+};
+
+window.onload = () => {
+  t.value = localStorage.memo || "";
+  try { undoStk = JSON.parse(localStorage.undoStack) || [t.value]; } catch { undoStk = [t.value]; }
+  try { redoStk = JSON.parse(localStorage.redoStack) || []; } catch {}
+  if (undoStk.at(-1) !== t.value) undoStk.push(t.value);
+  lastVal = t.value;
+  resize();
+  update();
+  const isDark = localStorage.theme === "dark";
+  document.body.classList.toggle("dark-mode", isDark);
+  document.querySelectorAll(".theme .material-symbols-outlined").forEach(i => {
+    i.textContent = isDark ? "dark_mode" : "light_mode";
+  });
+};
+
+t.addEventListener("input", () => {
+  resize();
+  if (/\s|\n/.test(t.value.slice(-1))) save();
+  update();
+});
+
+for (const btn of document.querySelectorAll("button")) {
+  btn.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    animateBtn(btn);
+    if (btn.classList.contains("undo")) {
+      if (undoStk.length <= 1) return;
+      if (t.value !== undoStk.at(-1)) redoStk.push(t.value);
+      else redoStk.push(undoStk.pop());
+      apply(undoStk.at(-1));
+    } else if (btn.classList.contains("redo")) {
+      if (!redoStk.length) return;
+      const v = redoStk.pop();
+      undoStk.push(v);
+      apply(v);
+    } else if (btn.classList.contains("copy")) {
+      copyText();
+    } else if (btn.classList.contains("clear")) {
+      if (!t.value) return;
+      if (confirm("メモをすべて削除しますか？")) {
+        save(); t.value = ""; redoStk = []; apply("");
+      }
+    } else if (btn.classList.contains("theme")) {
+      const dark = document.body.classList.toggle("dark-mode");
+      localStorage.theme = dark ? "dark" : "light";
+      document.querySelectorAll(".theme .material-symbols-outlined").forEach(i => {
+        i.textContent = dark ? "dark_mode" : "light_mode";
+      });
+      resize();
+    }
+  });
+  btn.ondblclick = e => e.preventDefault();
+}
 </script>
 </body>
 </html>
