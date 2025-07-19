@@ -128,32 +128,33 @@ const showMessage = (msg) => {
 
 const copyText = () => {
   if (!t.value) return;
-  const success = () => {
-    showMessage("コピーしました！");
-    t.blur(); // ← キーボードを閉じるための追加
-  };
-  const fail = () => {
-    showMessage("コピーに失敗しました");
-    t.blur(); // ← 失敗しても閉じる
-  };
 
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(t.value).then(success).catch(() => fallbackCopy());
-  } else {
-    fallbackCopy();
+  const hidden = document.createElement("textarea");
+  hidden.value = t.value;
+  hidden.setAttribute("readonly", "");
+  hidden.style.position = "absolute";
+  hidden.style.left = "-9999px";
+  hidden.style.fontSize = "12pt"; // iOSズーム対策
+  document.body.appendChild(hidden);
+
+  const selection = document.getSelection();
+  const selected = selection.rangeCount > 0 ? selection.getRangeAt(0) : false;
+
+  hidden.select();
+  hidden.setSelectionRange(0, hidden.value.length); // iOS対策
+
+  try {
+    const ok = document.execCommand("copy");
+    showMessage(ok ? "コピーしました！" : "コピーに失敗しました");
+  } catch (err) {
+    console.error(err);
+    showMessage("コピーに失敗しました");
   }
 
-  function fallbackCopy() {
-    try {
-      t.focus();
-      t.select();
-      t.setSelectionRange(0, t.value.length); // iOS対応
-      const ok = document.execCommand("copy");
-      ok ? success() : fail();
-    } catch (err) {
-      console.error(err);
-      fail();
-    }
+  document.body.removeChild(hidden);
+  if (selected) {
+    selection.removeAllRanges();
+    selection.addRange(selected);
   }
 };
 
