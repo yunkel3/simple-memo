@@ -1,252 +1,283 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>シンプルメモ帳</title>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-  <style>
-    html, body {
-      touch-action: manipulation;
-    }
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #fff;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    body.dark-mode {
-      background-color: #333;
-      color: #eee;
-    }
-    h1 {
-      font-size: 2em;
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 10px;
-    }
-    textarea {
-      width: 100%;
-      margin: 0;
-      min-height: 3em;
-      padding: 10px;
-      font-size: 16px;
-      resize: vertical;
-      box-sizing: border-box;
-      overflow-y: hidden;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #fff;
-      color: #333;
-      flex-grow: 1;
-    }
-    body.dark-mode textarea {
-      background-color: #555;
-      color: #eee;
-      border-color: #777;
-    }
-    .textarea-container {
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-    }
-    .button-container {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 0;
-      margin-top: 10px;
-      padding: 0;
-      width: 100%;
-      border-top: 1px solid #ccc;
-      border-bottom: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    body.dark-mode .button-container {
-      border-color: #888;
-    }
-    button {
-      padding: 10px 5px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-left: 1px solid #ccc;
-      border-radius: 0 !important;
-      background-color: #f0f0f0;
-      color: #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-grow: 1;
-      flex-shrink: 1;
-      flex-basis: 0;
-      box-sizing: border-box;
-      white-space: nowrap;
-      touch-action: manipulation;
-      transition: opacity 0.2s;
-    }
-    body.dark-mode button {
-      background-color: #666;
-      color: #eee;
-      border-color: #888;
-    }
-    .button-container button:first-child {
-      border-left: none;
-    }
-    .material-symbols-outlined {
-      font-size: 20px;
-      margin-right: 5px;
-      vertical-align: middle;
-    }
-    button#copyButton .material-symbols-outlined {
-      margin-right: 0;
-    }
-    .button-container button {
-      min-width: fit-content;
-    }
-    .disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>動画一覧（YouTube・ニコニコ・Twitch）</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #f9f9f9;
+    margin: 20px 0;
+    padding: 0;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  #btnContainer {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  #btnContainer button {
+    margin: 0 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border: 1px solid #888;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 1em;
+  }
+  #btnContainer button.active {
+    background: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+  #videoList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    max-width: 100vw;
+  }
+  #videoList.one-column .video-item { width: 100% !important; }
+  #videoList.two-columns .video-item { width: 50% !important; }
+  #videoList.three-columns .video-item { width: 33.3333% !important; }
+  .video-item {
+    background: #fff;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  .video-item img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+  }
+  .title {
+    font-weight: bold;
+    margin: 6px 0 2px;
+    text-align: center;
+    padding: 0 4px;
+    word-break: break-word;
+  }
+  .channel-name, .published-date {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 2px;
+    text-align: center;
+    padding: 0 4px;
+  }
+  @media (max-width:720px) {
+    #videoList .video-item { width: 100% !important; }
+  }
+
+  /* モーダル */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 1280px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .modal-content iframe {
+    width: 100%;
+    height: 72vh;
+    border: none;
+  }
+  .modal-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    text-align: center;
+    line-height: 30px;
+  }
+</style>
 </head>
 <body>
-  <h1>📝</h1>
-  <div class="textarea-container">
-    <textarea id="memo" placeholder="ここにメモを入力してください..." oninput="handleInput()" onkeydown="handleKeydown(event)" onblur="saveState()" onfocus="saveState()"></textarea>
-  </div>
-  <div class="button-container">
-    <button class="theme" onclick="toggleDarkMode()">
-      <span class="material-symbols-outlined" id="darkModeIcon">light_mode</span>
-    </button>
-    <button class="clear" id="clearButton" onclick="clearText()">
-      <span class="material-symbols-outlined">delete</span>
-    </button>
-    <button id="copyButton" onclick="copyText()">コピー</button>
-    <button id="undoButton" onclick="undo()">戻る</button>
-    <button id="redoButton" onclick="redo()">進む</button>
-  </div>
+<h2>登録チャンネル・ユーザーの最新動画30件（複数合算）</h2>
+<div id="btnContainer">
+  <button data-columns="one-column">1列（横幅いっぱい）</button>
+  <button data-columns="two-columns">2列表示</button>
+  <button data-columns="three-columns" class="active">3列表示（デフォルト）</button>
+</div>
+<div id="videoList" class="three-columns">読み込み中...</div>
 
-  <script>
-    const textarea = document.getElementById('memo');
-    const copyBtn = document.getElementById('copyButton');
-    const clearBtn = document.getElementById('clearButton');
-    const undoBtn = document.getElementById('undoButton');
-    const redoBtn = document.getElementById('redoButton');
-    let undoStack = [];
-    let redoStack = [];
-    let lastSavedText = '';
+<div id="modal" style="display:none;"></div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-      }
-      textarea.value = localStorage.getItem('memo') || '';
-      lastSavedText = textarea.value;
-      adjustHeight(textarea);
-      updateDarkModeIcon();
-      updateButtonStates();
-    });
+<script>
+const channelIds = ['UCah4_WVjmr8XA7i5aigwV-Q','UCE7gtjLeZKNXLp5YURzYYeg'];
+const niconicoUserIds = ['1594318'];
+const twitchChannelNames = ['icarus0219'];
+const proxy = 'https://corsproxy.io/?';
 
-    textarea.addEventListener('compositionend', () => {
-      saveState();
-      updateButtonStates();
-    });
+const formatDateToJp = d => {
+  const t = new Date(d);
+  return isNaN(t) ? '' : t.toLocaleString('ja-JP', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  });
+};
 
-    function adjustHeight(el) {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    }
+const fetchRSS = async (type, id) => {
+  const url = type === 'youtube'
+    ? `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`
+    : type === 'niconico'
+    ? `https://www.nicovideo.jp/user/${id}/video?rss=2.0`
+    : type === 'twitch'
+    ? `https://twitchrss.appspot.com/vod/${id}` : '';
+  if (!url) throw new Error('不明なフィードタイプ');
+  const res = await fetch(proxy + encodeURIComponent(url));
+  if (!res.ok) throw new Error(`${type} ${id} の取得失敗: ${res.statusText}`);
+  return new DOMParser().parseFromString(await res.text(), 'application/xml');
+};
 
-    function copyText() {
-      if (!textarea.value.trim()) return;
-      navigator.clipboard.writeText(textarea.value).catch(err => {
-        alert("コピーに失敗しました: " + err);
-      });
-    }
+const parseYoutubeEntry = e => {
+  const title = e.querySelector('title')?.textContent || 'タイトルなし';
+  const videoUrl = e.querySelector('link[rel="alternate"]')?.href || '';
+  const videoId = videoUrl.split('v=')[1] || videoUrl.split('/').pop();
+  const thumbnail = e.querySelector('media\\:thumbnail,thumbnail')?.getAttribute('url') || '';
+  const channelName = e.querySelector('author>name')?.textContent || '投稿者不明';
+  const published = e.querySelector('published')?.textContent || '';
+  return { title, videoUrl, videoId, thumbnail, channelName, publishedDate: published, platform: 'youtube' };
+};
 
-    function clearText() {
-      if (!textarea.value) return;
-      saveState();
-      textarea.value = '';
-      adjustHeight(textarea);
-      updateButtonStates();
-    }
+const parseNiconicoChannelName = xml => {
+  const title = xml.querySelector('channel>title')?.textContent || '';
+  const m = title.match(/^(.+?)さんの投稿動画/);
+  return m ? m[1] : '投稿者不明';
+};
 
-    function toggleDarkMode() {
-      const body = document.body;
-      body.classList.toggle('dark-mode');
-      localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
-      updateDarkModeIcon();
-    }
+const parseNiconicoItem = (item, channelName) => {
+  const title = item.querySelector('title')?.textContent || 'タイトルなし';
+  const videoUrl = item.querySelector('link')?.textContent || '';
+  const guid = item.querySelector('guid')?.textContent || '';
+  const m = guid.match(/\/(sm\d+|nm\d+)$/);
+  const videoId = m ? m[1] : '';
+  let thumbnail = item.querySelector('media\\:thumbnail,thumbnail')?.getAttribute('url') || '';
+  if (!thumbnail && videoId) {
+    const idNum = videoId.replace(/^(sm|nm)/, '');
+    thumbnail = `https://nicovideo.cdn.nimg.jp/thumbnails/${idNum}/${videoId}.L`;
+  }
+  const published = item.querySelector('pubDate')?.textContent || '';
+  return { title, videoUrl, videoId, thumbnail, channelName, publishedDate: published, platform: 'niconico' };
+};
 
-    function updateDarkModeIcon() {
-      const icon = document.getElementById('darkModeIcon');
-      icon.textContent = document.body.classList.contains('dark-mode') ? 'dark_mode' : 'light_mode';
-    }
+const parseTwitchItem = item => {
+  const titleRaw = item.querySelector('title')?.textContent || 'タイトルなし';
+  const title = titleRaw.replace(/\s*@.+$/, '');
+  const videoUrl = item.querySelector('link')?.textContent || '';
+  const guid = item.querySelector('guid')?.textContent || '';
+  const published = item.querySelector('pubDate')?.textContent || '';
+  const desc = item.querySelector('description')?.textContent || '';
+  const m = desc.match(/<img\s+src="([^"]+)"/);
+  const thumbnail = m ? m[1] : '';
+  return { title, videoUrl, videoId: guid, thumbnail, channelName: twitchChannelNames[0] || 'Twitch', publishedDate: published, platform: 'twitch' };
+};
 
-    function saveState() {
-      const current = textarea.value;
-      if (current !== lastSavedText) {
-        undoStack.push(lastSavedText);
-        lastSavedText = current;
-        redoStack = [];
-        localStorage.setItem('memo', current);
-        updateButtonStates();
-      }
-    }
+const createVideoElement = video => {
+  const div = document.createElement('div');
+  div.className = 'video-item';
+  div.innerHTML = `
+    <img src="${video.thumbnail}" alt="${video.title}" loading="lazy" />
+    <div class="title">${video.title}</div>
+    <div class="channel-name">${video.channelName}</div>
+    <div class="published-date">${formatDateToJp(video.publishedDate)}</div>`;
 
-    function handleInput() {
-      adjustHeight(textarea);
-      localStorage.setItem('memo', textarea.value);
-      updateButtonStates();
-    }
+  div.onclick = () => showModal(video);
+  return div;
+};
 
-    function handleKeydown(event) {
-      const key = event.key;
-      if (key === ' ' || key === 'Enter') {
-        saveState();
-      } else if (key === 'Backspace') {
-        const now = textarea.value;
-        if (lastSavedText.length - now.length >= 2) {
-          saveState();
-        }
-      }
-    }
+const showModal = video => {
+  const modal = document.getElementById('modal');
+  let src = '';
+  if (video.platform === 'youtube')
+    src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1`;
+  else if (video.platform === 'niconico')
+    src = `https://embed.nicovideo.jp/watch/${video.videoId}?autoplay=1`;
+  else if (video.platform === 'twitch')
+    src = `https://player.twitch.tv/?video=${video.videoId}&parent=${location.hostname}&autoplay=true`;
 
-    function undo() {
-      if (undoStack.length > 0) {
-        redoStack.push(textarea.value);
-        const prev = undoStack.pop();
-        textarea.value = prev;
-        lastSavedText = prev;
-        adjustHeight(textarea);
-        localStorage.setItem('memo', prev);
-        updateButtonStates();
-      }
-    }
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="hideModal(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="hideModal(event)">×</button>
+        <iframe src="${src}" allowfullscreen allow="autoplay"></iframe>
+      </div>
+    </div>`;
+  modal.style.display = 'block';
+};
 
-    function redo() {
-      if (redoStack.length > 0) {
-        undoStack.push(textarea.value);
-        const next = redoStack.pop();
-        textarea.value = next;
-        lastSavedText = next;
-        adjustHeight(textarea);
-        localStorage.setItem('memo', next);
-        updateButtonStates();
-      }
-    }
+const hideModal = e => {
+  document.getElementById('modal').style.display = 'none';
+};
 
-    function updateButtonStates() {
-      copyBtn.classList.toggle('disabled', !textarea.value.trim());
-      clearBtn.classList.toggle('disabled', !textarea.value);
-      undoBtn.classList.toggle('disabled', undoStack.length === 0);
-      redoBtn.classList.toggle('disabled', redoStack.length === 0);
-    }
-  </script>
+async function loadVideos() {
+  const container = document.getElementById('videoList');
+  container.textContent = '読み込み中...';
+  try {
+    const allVideos = [];
+
+    const youtubePromise = Promise.all(channelIds.map(async id => {
+      const xml = await fetchRSS('youtube', id);
+      return [...xml.querySelectorAll('entry')].map(parseYoutubeEntry);
+    }));
+
+    const niconicoPromise = Promise.all(niconicoUserIds.map(async id => {
+      const xml = await fetchRSS('niconico', id);
+      const name = parseNiconicoChannelName(xml);
+      return [...xml.querySelectorAll('item')].map(item => parseNiconicoItem(item, name));
+    }));
+
+    const twitchPromise = Promise.all(twitchChannelNames.map(async name => {
+      const xml = await fetchRSS('twitch', name);
+      return [...xml.querySelectorAll('item')].map(parseTwitchItem);
+    }));
+
+    const results = await Promise.all([youtubePromise, niconicoPromise, twitchPromise]);
+    results.flat(2).forEach(v => allVideos.push(v));
+
+    allVideos.sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate));
+    const top30 = allVideos.slice(0, 30);
+
+    container.innerHTML = '';
+    top30.forEach(v => container.appendChild(createVideoElement(v)));
+  } catch (e) {
+    container.textContent = 'エラー: ' + e.message;
+    console.error(e);
+  }
+}
+
+document.getElementById('btnContainer').onclick = e => {
+  if (e.target.tagName !== 'BUTTON') return;
+  const videoList = document.getElementById('videoList');
+  videoList.className = e.target.dataset.columns;
+  [...e.target.parentNode.children].forEach(btn => btn.classList.remove('active'));
+  e.target.classList.add('active');
+};
+
+loadVideos();
+</script>
 </body>
 </html>
